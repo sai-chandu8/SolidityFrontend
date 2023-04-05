@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Set and Get Name</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+  
+</head>
+<body>
+  <h1>Set and Get Name</h1>
+  <label for="nameInput">Name:</label>
+  <input type="text" id="nameInput"><br><br>
+  <button id="setNameButton">Set Name</button>
+  <button id="getNameButton">Get Name</button><br><br>
+  <label for="nameLabel">Current Name:</label>
+  <span id="nameLabel"></span><br><br>
+
+  <button id="connect-button">Connect to MetaMask</button>
+
+</body>
+<script>
+
+let web3;
+
+if (typeof window.ethereum !== 'undefined') {
+  web3 = new Web3(window.ethereum);
+} else if (typeof window.web3 !== 'undefined') {
+  web3 = new Web3(window.web3.currentProvider);
+} else {
+  console.log('No web3 provider detected');
+}
+
+const connectButton = document.getElementById('connect-button');
+
+connectButton.addEventListener('click', async () => {
+  try {
+    // Request accounts from MetaMask
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+
+    // Log the first account to the console
+    console.log(accounts[0]);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+
+
+// Connect to the contract
+    const contractAddress = "0xC9F078d4eA442Ab3F6777823e56414F34c16E337";
+    const abi = [
+    {
+        "inputs": [],
+        "name": "getName",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "name": "setName",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+];
+    
+    const nameContract = new web3.eth.Contract(abi, contractAddress);
+    
+    // Get the input field and buttons from the HTML
+    const nameInput = document.getElementById("nameInput");
+    const setNameButton = document.getElementById("setNameButton");
+    const getNameButton = document.getElementById("getNameButton");
+    const nameLabel = document.getElementById("nameLabel");
+    
+
+
+    // Set the name when the "Set Name" button is clicked
+    setNameButton.addEventListener("click", async () => {
+  const newName = nameInput.value;
+  const accounts = await web3.eth.getAccounts();
+  if (accounts.length === 0) {
+    alert("Please connect your Ethereum wallet to use this app");
+    return;
+  }
+  const from = accounts[0];
+  await nameContract.methods.setName(newName).send({ from: from });
+});
+
+    
+    // Get the name and display it when the "Get Name" button is clicked
+    getNameButton.addEventListener("click", async () => {
+      const name = await nameContract.methods.getName().call();
+      nameLabel.textContent = name;
+    });
+
+    </script>
+</html>
